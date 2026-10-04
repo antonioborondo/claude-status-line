@@ -13,27 +13,19 @@ the model, effort, context, and cost:
 
 ## Configuration
 
-Replace `/path/to/claude-status-line` with the directory where you want the repo:
-
-1. Clone the repo:
+1. Install the binary:
 
    ```
-   git clone https://github.com/antonioborondo/claude-status-line.git /path/to/claude-status-line
+   cargo install claude-status-line
    ```
 
-2. Build the executable:
-
-   ```
-   cd /path/to/claude-status-line && cargo build --release
-   ```
-
-3. Add the status line to your Claude settings in `~/.claude/settings.json`:
+1. Add the status line to your Claude settings in `~/.claude/settings.json`:
 
    ```json
    {
      "statusLine": {
        "type": "command",
-       "command": "/path/to/claude-status-line/target/release/claude-status-line"
+       "command": "claude-status-line"
      }
    }
    ```
