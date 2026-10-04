@@ -1,5 +1,7 @@
 [package]
+description = "Claude status line that displays the model, effort, context, and cost."
 edition = "2024"
+homepage = "https://github.com/antonioborondo/claude-status-line"
 license = "Unlicense"
 name = "claude-status-line"
 version = "1.0.0"
