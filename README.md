@@ -4,10 +4,10 @@
 
 ## Description
 
-Claude [status line](https://code.claude.com/docs/en/statusline) that displays
-the model, effort, context, and cost:
+Claude Code [status line](https://code.claude.com/docs/en/statusline) that
+displays the model, effort, context, and cost:
 
-```
+```bash
 🧠 Opus 💪 high 💭 42% 💰 $1.23
 ```
 
@@ -15,7 +15,7 @@ the model, effort, context, and cost:
 
 1. Install the binary:
 
-   ```
+   ```bash
    cargo install claude-status-line
    ```
 
