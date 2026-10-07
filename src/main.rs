@@ -47,6 +47,11 @@ fn main() {
     println!("{}", render(&input));
 }
 
+const MODEL_ICON: &str = "🧠";
+const EFFORT_ICON: &str = "💪";
+const CONTEXT_ICON: &str = "💭";
+const COST_ICON: &str = "💰";
+
 fn render(json: &str) -> String {
     let input: Input = serde_json::from_str(json).unwrap_or_default();
 
@@ -55,7 +60,9 @@ fn render(json: &str) -> String {
     let context = parse_context(&input);
     let cost = parse_cost(&input);
 
-    format!("🧠 {model} 💪 {effort} 💭 {context}% 💰 ${cost:.2}")
+    format!(
+        "{MODEL_ICON} {model} {EFFORT_ICON} {effort} {CONTEXT_ICON} {context}% {COST_ICON} ${cost:.2}"
+    )
 }
 
 fn parse_model(input: &Input) -> &str {
@@ -115,18 +122,21 @@ mod tests {
             "context_window": {"used_percentage": 42.4},
             "cost": {"total_cost_usd": 1.234}
         }"#;
-        assert_eq!(render(json), "🧠 Opus 💪 high 💭 42% 💰 $1.23");
+        assert_eq!(
+            render(json),
+            format!("{MODEL_ICON} Opus {EFFORT_ICON} high {CONTEXT_ICON} 42% {COST_ICON} $1.23")
+        );
     }
 
     #[test]
     fn model_defaults_to_id_when_display_name_empty_or_missing() {
         assert_eq!(
             render(r#"{"model": {"display_name": "", "id": "claude-opus"}}"#),
-            "🧠 claude-opus 💪 ? 💭 0% 💰 $0.00"
+            format!("{MODEL_ICON} claude-opus {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
         );
         assert_eq!(
             render(r#"{"model": {"id": "claude-opus"}}"#),
-            "🧠 claude-opus 💪 ? 💭 0% 💰 $0.00"
+            format!("{MODEL_ICON} claude-opus {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
         );
     }
 
@@ -134,62 +144,83 @@ mod tests {
     fn model_defaults_to_question_mark_when_empty() {
         assert_eq!(
             render(r#"{"model": {"display_name": ""}}"#),
-            "🧠 ? 💪 ? 💭 0% 💰 $0.00"
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
         );
         assert_eq!(
             render(r#"{"model": {"id": ""}}"#),
-            "🧠 ? 💪 ? 💭 0% 💰 $0.00"
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
         );
     }
 
     #[test]
     fn model_defaults_to_question_mark_when_missing() {
-        assert_eq!(render("{}"), "🧠 ? 💪 ? 💭 0% 💰 $0.00");
+        assert_eq!(
+            render("{}"),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
+        );
     }
 
     #[test]
     fn effort_defaults_to_question_mark_when_empty() {
-        assert_eq!(render(r#"{"effort": ""}"#), "🧠 ? 💪 ? 💭 0% 💰 $0.00");
+        assert_eq!(
+            render(r#"{"effort": ""}"#),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
+        );
         assert_eq!(
             render(r#"{"effort": {"level": ""}}"#),
-            "🧠 ? 💪 ? 💭 0% 💰 $0.00"
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
         );
     }
 
     #[test]
     fn effort_defaults_to_question_mark_when_missing() {
-        assert_eq!(render("{}"), "🧠 ? 💪 ? 💭 0% 💰 $0.00");
+        assert_eq!(
+            render("{}"),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
+        );
     }
 
     #[test]
     fn context_used_percentage_takes_priority_over_used_tokens() {
         let json = r#"{"context_window": {"used_percentage": 10.0, "used_tokens": 900, "context_window_size": 1000}}"#;
-        assert_eq!(render(json), "🧠 ? 💪 ? 💭 10% 💰 $0.00");
+        assert_eq!(
+            render(json),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 10% {COST_ICON} $0.00")
+        );
     }
 
     #[test]
     fn context_computed_from_tokens_and_size() {
         let json = r#"{"context_window": {"used_tokens": 250, "context_window_size": 1000}}"#;
-        assert_eq!(render(json), "🧠 ? 💪 ? 💭 25% 💰 $0.00");
+        assert_eq!(
+            render(json),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 25% {COST_ICON} $0.00")
+        );
     }
 
     #[test]
     fn context_defaults_to_zero_when_size_is_zero() {
         let json = r#"{"context_window": {"used_tokens": 250, "context_window_size": 0}}"#;
-        assert_eq!(render(json), "🧠 ? 💪 ? 💭 0% 💰 $0.00");
+        assert_eq!(
+            render(json),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
+        );
     }
 
     #[test]
     fn context_rounds_to_nearest_integer() {
         let json = r#"{"context_window": {"used_percentage": 42.5}}"#;
-        assert_eq!(render(json), "🧠 ? 💪 ? 💭 43% 💰 $0.00");
+        assert_eq!(
+            render(json),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 43% {COST_ICON} $0.00")
+        );
     }
 
     #[test]
     fn cost_is_formatted_with_two_decimals() {
         assert_eq!(
             render(r#"{"cost": {"total_cost_usd": 1.5}}"#),
-            "🧠 ? 💪 ? 💭 0% 💰 $1.50"
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $1.50")
         );
     }
 
@@ -197,17 +228,23 @@ mod tests {
     fn cost_defaults_to_zero_when_empty() {
         assert_eq!(
             render(r#"{"cost": {"total_cost_usd": }}"#),
-            "🧠 ? 💪 ? 💭 0% 💰 $0.00"
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
         );
     }
 
     #[test]
     fn cost_defaults_to_zero_when_missing() {
-        assert_eq!(render("{}"), "🧠 ? 💪 ? 💭 0% 💰 $0.00");
+        assert_eq!(
+            render("{}"),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
+        );
     }
 
     #[test]
     fn invalid_json_renders_default_line() {
-        assert_eq!(render("not json"), "🧠 ? 💪 ? 💭 0% 💰 $0.00");
+        assert_eq!(
+            render("not json"),
+            format!("{MODEL_ICON} ? {EFFORT_ICON} ? {CONTEXT_ICON} 0% {COST_ICON} $0.00")
+        );
     }
 }
